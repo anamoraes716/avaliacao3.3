@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestão Agrícola</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #e8f5e9; 
+            margin: 0;
+            padding: 20px;
+            color: #333;
+            background-image: url('A.jpg'); 
+            background-size: cover;
+            background-position: center;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.9); 
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2 {
+            color: #4caf50; 
+            font-size: 2em;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        input[type="email"],
+        input[type="password"],
+        input[type="text"],
+        input[type="number"],
+        input[type="date"] {
+            width: calc(100% - 20px);
+            padding: 15px;
+            margin: 10px 0;
+            border: 2px solid #4caf50;
+            border-radius: 5px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+        input:focus {
+            border-color: #81c784; 
+        }
+        button {
+            padding: 15px 25px;
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            margin: 10px 0;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        button:hover {
+            background-color: #388e3c;
+            transform: translateY(-2px);
+        }
+        nav ul {
+            list-style: none;
+            padding: 0;
+            text-align: center;
+        }
+        nav ul li {
+            display: inline;
+            margin: 0 15px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+            font-size: 1em;
+        }
+        table th {
+            background-color: #4caf50;
+            color: white;
+        }
+        .form-section {
+            display: none;
+        }
+        .btn-link {
+            color: #4caf50;
+            text-decoration: none;
+        }
+        .btn-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="app">
+        
+        <div id="login" class="form-section">
+            <h1>Login</h1>
+            <form id="loginForm">
+                <input type="email" placeholder="E-mail" required>
+                <input type="password" placeholder="Senha" required>
+                <button type="submit">Entrar</button>
+            </form>
+            <p><a href="#" class="btn-link" onclick="showRegister()">Registrar-se</a></p>
+        </div>
+
+        
+        <div id="register" class="form-section">
+            <h1>Cadastro</h1>
+            <form id="registerForm">
+                <input type="email" placeholder="E-mail" required>
+                <input type="password" placeholder="Senha" required>
+                <button type="submit">Cadastrar</button>
+            </form>
+            <p><a href="#" class="btn-link" onclick="showLogin()">Já possui uma conta? Faça login.</a></p>
+            <button onclick="showLogin()">Voltar</button>
+        </div>
+
+        
+        <div id="dashboard" class="form-section">
+            <h1>Painel do Agricultor</h1>
+            <nav>
+                <ul>
+                    <li><a href="#" class="btn-link" onclick="showPlantacao()">Gerenciar Plantações</a></li>
+                    <li><a href="#" class="btn-link" onclick="showAtividades()">Atividades Agrícolas</a></li>
+                    <li><a href="#" class="btn-link" onclick="logout()">Sair</a></li>
+                </ul>
+            </nav>
+            <h2>Minhas Plantações</h2>
+            <table id="plantacoesTable">
+                <thead>
+                    <tr>
+                        <th>Tipo de Cultivo</th>
+                        <th>Área (ha)</th>
+                        <th>Data de Plantio</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        
+        <div id="plantacao" class="form-section">
+            <h1>Gerenciar Plantações</h1>
+            <form id="plantacaoForm">
+                <input type="text" id="tipoCultivo" placeholder="Tipo de Cultivo" required>
+                <input type="number" id="areaPlantada" placeholder="Área Plantada (ha)" required>
+                <input type="date" id="dataPlantio" required>
+                <button type="submit">Salvar Plantação</button>
+            </form>
+            <button onclick="showDashboard()">Voltar</button>
+        </div>
+
+        
+        <div id="atividades" class="form-section">
+            <h1>Atividades Agrícolas</h1>
+            <form id="atividadeForm">
+                <input type="text" id="atividade" placeholder="Atividade" required>
+                <select id="plantacaoSelect" required></select>
+                <button type="submit">Adicionar Atividade</button>
+            </form>
+            <h2>Atividades Realizadas</h2>
+            <table id="atividadesTable">
+                <thead>
+                    <tr>
+                        <th>Atividade</th>
+                        <th>Plantação</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <button onclick="showDashboard()">Voltar</button>
+        </div>
+    </div>
+
+    <script>
+        let users = [];
+        let plantacoes = [];
+        let atividades = [];
+        let currentUser = null;
+
+        function showRegister() {
+            hideAllSections();
+            document.getElementById('register').style.display = 'block';
+        }
+
+        function showLogin() {
+            hideAllSections();
+            document.getElementById('login').style.display = 'block';
+        }
+
+        function showDashboard() {
+            hideAllSections();
+            document.getElementById('dashboard').style.display = 'block';
+            renderPlantacoes();
+        }
+
+        function showPlantacao() {
+            hideAllSections();
+            document.getElementById('plantacao').style.display = 'block';
+        }
+
+        function showAtividades() {
+            hideAllSections();
+            document.getElementById('atividades').style.display = 'block';
+            renderPlantacoesSelect();
+            renderAtividades();
+        }
+
+        function hideAllSections() {
+            const sections = document.querySelectorAll('.form-section');
+            sections.forEach(section => {
+                section.style.display = 'none';
+            });
+        }
+
+        function logout() {
+            currentUser = null;
+            showLogin();
+        }
+
+        document.getElementById('registerForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const email = this[0].value;
+            const senha = this[1].value;
+
+            users.push({ email, senha });
+            alert('Usuário cadastrado com sucesso!');
+            showLogin();
+        });
+
+        document.getElementById('loginForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const email = this[0].value;
+            const senha = this[1].value;
+
+            const user = users.find(u => u.email === email && u.senha === senha);
+            if (user) {
+                currentUser = user;
+                showDashboard();
+            } else {
+                alert('E-mail ou senha inválidos.');
+            }
+        });
+
+        document.getElementById('plantacaoForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const tipoCultivo = document.getElementById('tipoCultivo').value;
+            const areaPlantada = document.getElementById('areaPlantada').value;
+            const dataPlantio = document.getElementById('dataPlantio').value;
+
+            const plantacao = { tipoCultivo, areaPlantada, dataPlantio };
+            plantacoes.push(plantacao);
+            this.reset();
+            renderPlantacoes();
+            showDashboard();
+        });
+
+        function renderPlantacoes() {
+            const tableBody = document.getElementById('plantacoesTable').querySelector('tbody');
+            tableBody.innerHTML = '';
+            plantacoes.forEach((plantacao, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${plantacao.tipoCultivo}</td>
+                    <td>${plantacao.areaPlantada}</td>
+                    <td>${plantacao.dataPlantio}</td>
+                    <td>
+                        <button onclick="editPlantacao(${index})">Editar</button>
+                        <button onclick="deletePlantacao(${index})">Excluir</button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        function editPlantacao(index) {
+            const plantacao = plantacoes[index];
+            document.getElementById('tipoCultivo').value = plantacao.tipoCultivo;
+            document.getElementById('areaPlantada').value = plantacao.areaPlantada;
+            document.getElementById('dataPlantio').value = plantacao.dataPlantio;
+            deletePlantacao(index);
+        }
+
+        function deletePlantacao(index) {
+            plantacoes.splice(index, 1);
+            renderPlantacoes();
+        }
+
+        function renderPlantacoesSelect() {
+            const select = document.getElementById('plantacaoSelect');
+            select.innerHTML = '';
+            plantacoes.forEach((plantacao, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = plantacao.tipoCultivo;
+                select.appendChild(option);
+            });
+        }
+
+        document.getElementById('atividadeForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const atividade = document.getElementById('atividade').value;
+            const plantacaoIndex = document.getElementById('plantacaoSelect').value;
+
+            const atividadeObj = { atividade, plantacaoIndex };
+            atividades.push(atividadeObj);
+            this.reset();
+            renderAtividades();
+        });
+
+        function renderAtividades() {
+            const tableBody = document.getElementById('atividadesTable').querySelector('tbody');
+            tableBody.innerHTML = '';
+            atividades.forEach(atividade => {
+                const plantacao = plantacoes[atividade.plantacaoIndex];
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${atividade.atividade}</td>
+                    <td>${plantacao.tipoCultivo}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        showLogin();
+    </script>
+</body>
+</html>
